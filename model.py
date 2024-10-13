@@ -32,8 +32,3 @@ class MNISTNet(nn.Module):
         x = self.fc3(x) 
         return x
 
-# Exemple de passage d'une image batch (batch de 1 image 1x28x28)
-model = MNISTNet()
-input_example = torch.randn(1, 1, 28, 28)
-output = model(input_example)
-print(output.shape)  # torch.Size([1, 10]), correspondant aux 10 classes du MNIST
