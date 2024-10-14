@@ -30,8 +30,8 @@ def train(net, optimizer, loader, writer, epochs=10):
             loss.backward()
             optimizer.step()
             t.set_description(f'training loss: {mean(running_loss)}')
-            writer.add_scalar('training loss', mean(running_loss), idx)
-            idx+=1
+            writer.add_scalar('training loss', mean(running_loss), epoch)
+            
 
 
 def test(model, dataloader):
@@ -115,6 +115,24 @@ if __name__=='__main__':
     test_acc = test(net, testloader)
     print(f'Test accuracy: {test_acc:.4f}')
     torch.save(net.state_dict(), 'weights/mnist_net.pth')
+
+    #add embeddings to tensorboard
+    perm = torch.randperm(len(trainset.data))
+    images, labels = trainset.data[perm][:256], trainset.targets[perm][:256]
+    images = images.unsqueeze(1).float().to(device)
+    with torch.no_grad():
+        embeddings = net.get_features(images)
+        print(embeddings.shape[0])
+        print(labels.shape[0])
+        writer.add_embedding(embeddings,
+                    metadata=labels,
+                    label_img=images, global_step=1)
+
+    # save networks computational graph in tensorboard
+    writer.add_graph(net, images)
+    # save a dataset sample in tensorboard
+    img_grid = torchvision.utils.make_grid(images[:64])
+    writer.add_image('mnist_images', img_grid)
 
         
 
